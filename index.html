@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI图片生成器</title>
+   
+</head>
+ <style>
+ .info-item {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.success {
+    background-color: #d4edda; /* 绿色背景 */
+    border-left: 4px solid #28a745; /* 绿色边框 */
+    color: #155724; /* 绿色文字 */
+}
+
+.error {
+    background-color: #f8d7da; /* 红色背景 */
+    border-left: 4px solid #dc3545; /* 红色边框 */
+    color: #721c24; /* 红色文字 */
+}
+
+:root {
+
+            --primary-color: #4361ee;
+
+            --secondary-color: #3f37c9;
+
+            --success-color: #4cc9f0;
+
+            --error-color: #f72585;
+
+            --light-color: #f8f9fa;
+
+            --dark-color: #212529;
+
+        }
+
+        * {
+
+            box-sizing: border-box;
+
+            margin: 0;
+
+            padding: 0;
+
+        }
+
+        body {
+
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+            line-height: 1.6;
+
+            color: var(--dark-color);
+
+            background: linear-gradient(135deg, #f4f4f9, #e0e0f0);
+
+            min-height: 100vh;
+
+            padding: 20px;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+        }
+
+        .container {
+
+            width: 100%;
+
+            max-width: 800px;
+
+            background-color: rgba(255, 255, 255, 0.95);
+
+            border-radius: 15px;
+
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+
+            padding: 30px;
+
+            backdrop-filter: blur(10px);
+
+            animation: fadeIn 0.5s ease-out;
+
+        }
+
+        @keyframes fadeIn {
+
+            from { opacity: 0; transform: translateY(-20px); }
+
+            to { opacity: 1; transform: translateY(0); }
+
+        }
+
+        h1 {
+
+            text-align: center;
+
+            color: var(--primary-color);
+
+            margin-bottom: 30px;
+
+            font-size: 2.2rem;
+
+            font-weight: 700;
+
+        }
+
+        .form-group {
+
+            margin-bottom: 20px;
+
+        }
+
+        label {
+
+            display: block;
+
+            margin-bottom: 8px;
+
+            font-weight: 600;
+
+            color: var(--dark-color);
+
+        }
+
+        input[type="text"],
+
+        select,
+
+        button {
+
+            width: 100%;
+
+            padding: 12px 15px;
+
+            border: 2px solid #ddd;
+
+            border-radius: 8px;
+
+            font-size: 16px;
+
+            transition: all 0.3s ease;
+
+        }
+
+        input[type="text"]:focus,
+
+        select:focus {
+
+            border-color: var(--primary-color);
+
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+
+            outline: none;
+
+        }
+
+        button {
+
+            background-color: var(--primary-color);
+
+            color: white;
+
+            font-weight: 600;
+
+            cursor: pointer;
+
+            border: none;
+
+            margin-top: 10px;
+
+        }
+
+        button:hover {
+
+            background-color: var(--secondary-color);
+
+            transform: translateY(-2px);
+
+        }
+
+        button:active {
+
+            transform: translateY(0);
+
+        }
+
+        .loading {
+
+            display: none;
+
+            text-align: center;
+
+            padding: 20px;
+
+        }
+
+        .spinner {
+
+            border: 4px solid rgba(0, 0, 0, 0.1);
+
+            border-left-color: var(--primary-color);
+
+            border-radius: 50%;
+
+            width: 40px;
+
+            height: 40px;
+
+            animation: spin 1s linear infinite;
+
+            margin: 0 auto 15px;
+
+        }
+
+        @keyframes spin {
+
+            to { transform: rotate(360deg); }
+
+        }
+
+        .image-container {
+
+            margin: 25px 0;
+
+            text-align: center;
+
+            animation: fadeIn 0.5s ease-out;
+
+        }
+
+        .image-container img {
+
+            max-width: 100%;
+
+            height: auto;
+
+            border-radius: 10px;
+
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+
+            transition: transform 0.3s ease;
+
+        }
+
+        .image-container img:hover {
+
+            transform: scale(1.02);
+
+        }
+
+        .info-panel {
+
+            background-color: rgba(240, 240, 255, 0.7);
+
+            border-radius: 10px;
+
+            padding: 15px;
+
+            margin-top: 20px;
+
+            border-left: 4px solid var(--primary-color);
+
+        }
+
+        .info-item {
+
+            margin-bottom: 10px;
+
+            padding-bottom: 10px;
+
+            border-bottom: 1px dashed #ddd;
+
+        }
+
+        .info-item:last-child {
+
+            margin-bottom: 0;
+
+            padding-bottom: 0;
+
+            border-bottom: none;
+
+        }
+
+        .info-item strong {
+
+            color: var(--primary-color);
+
+        }
+
+        .success {
+
+            color: var(--success-color);
+
+        }
+
+        .error {
+
+            color: var(--error-color);
+
+        }
+
+        .actions {
+
+            display: flex;
+
+            justify-content: center;
+
+            gap: 15px;
+
+            margin-top: 20px;
+
+            display: none;
+
+        }
+
+        .actions button {
+
+            flex: 1;
+
+            max-width: 200px;
+
+            margin: 0;
+
+        }
+
+        @media (max-width: 600px) {
+
+            .container {
+
+                padding: 20px;
+
+            }
+
+            h1 {
+
+                font-size: 1.8rem;
+
+            }
+
+            .actions {
+
+                flex-direction: column;
+
+                align-items: center;
+
+            }
+
+            .actions button {
+
+                max-width: 100%;
+
+            }
+
+        }    </style>
+<body>
+    <div class="container">
+        <h1>AI 图片生成器</h1>
+        <div class="form-group">
+            <label for="prompt">图片描述</label>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="prompt" placeholder="例如：一只在森林中奔跑的狐狸">
+                <button type="button" id="randomPromptBtn">随机提示</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="resolution">图片分辨率</label>
+            <select id="resolution">
+                <option value="512x512">小 (512×512)</option>
+                <option value="1024x1024" selected>中 (1024×1024)</option>
+                <option value="1920x1080">1080P (1920×1080)</option>
+                <option value="3840x2160">4K (3840×2160)</option>
+                <option value="7680x4320">8K (7680×4320)</option>
+            </select>
+        </div>
+        <button type="button" id="generateBtn">生成图片</button>
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>正在生成图片，请稍候...</p>
+        </div>
+        <div class="image-container" id="imageContainer">
+            <!-- 生成的图片将显示在这里 -->
+        </div>
+        <div class="actions" id="actions">
+            <button type="button" id="saveBtn">保存图片</button>
+            <button type="button" id="copyBtn">复制图片</button>
+        </div>
+        <div class="info-panel" id="infoDisplay">
+            <!-- 生成信息将显示在这里 -->
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const CONFIG = {
+                IMAGE_API: {
+                    ENDPOINT: 'https://image.pollinations.ai/prompt/',
+                    DEFAULT_PARAMS: {
+                        seed: () => Math.floor(Math.random() * 10000),
+                        model: 'flux',
+                        nologo: true
+                    }
+                },
+                BACKEND_API: {
+                    UPLOAD_URL: 'http://156.254.16.189:10563/upload' // 替换为你的后端 API 地址
+                }
+            };
+
+            const PROMPTS = [
+                "星空下的宁静湖泊，银河清晰可见",
+                "未来城市，霓虹灯光，赛博朋克风格",
+                "一只在森林中奔跑的狐狸，阳光透过树叶洒下",
+                "古典城堡，被绿树环绕，雾气弥漫",
+                "秋天的枫树林，落叶铺满地面",
+                "海底世界，五彩斑斓的珊瑚和鱼群",
+                "雪山之巅，日出时分，金光洒满大地",
+                "沙漠中的绿洲，清澈的湖水倒映着蓝天",
+                "夜晚的城市，灯火辉煌，车水马龙",
+                "春天的花园，百花盛开，蝴蝶飞舞",
+                "极光下的冰原，神秘而美丽",
+                "热带雨林，瀑布飞流直下",
+                "古老的寺庙，被晨雾笼罩",
+                "宇宙中的星球，星光璀璨",
+                "草原上的野马，自由奔跑"
+            ];
+
+            const DOM = {
+                promptInput: document.getElementById("prompt"),
+                resolutionSelect: document.getElementById("resolution"),
+                randomPromptBtn: document.getElementById("randomPromptBtn"),
+                generateBtn: document.getElementById("generateBtn"),
+                saveBtn: document.getElementById("saveBtn"),
+                copyBtn: document.getElementById("copyBtn"),
+                loadingIndicator: document.getElementById("loading"),
+                imageContainer: document.getElementById("imageContainer"),
+                infoDisplay: document.getElementById("infoDisplay"),
+                actionButtons: document.getElementById("actions")
+            };
+
+            const App = {
+                init: function () {
+                    this.bindEvents();
+                },
+
+                bindEvents: function () {
+                    DOM.randomPromptBtn.addEventListener('click', () => this.generateRandomPrompt());
+                    DOM.generateBtn.addEventListener('click', () => this.generateImage());
+                    DOM.saveBtn.addEventListener('click', () => this.saveImage());
+                    DOM.copyBtn.addEventListener('click', () => this.copyImage());
+                },
+
+                generateRandomPrompt: function () {
+                    const randomPrompt = PROMPTS[Math.floor(Math.random() * PROMPTS.length)];
+                    DOM.promptInput.value = randomPrompt;
+                    DOM.promptInput.focus();
+                },
+
+                isPromptValid: function (prompt) {
+                    const bannedWords = ["暴力", "色情", "违法", "政治", "敏感"];
+                    return !bannedWords.some(word => prompt.includes(word));
+                },
+
+                generateFileName: function (prompt) {
+                    const now = new Date();
+                    const dateTime = now.toISOString().replace(/[:.]/g, "-").slice(0, 19);
+                    const shortPrompt = prompt
+                        .slice(0, 20)
+                        .replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, "")
+                        .trim();
+                    return `ai_image_${dateTime}_${shortPrompt || "untitled"}.jpg`;
+                },
+
+                uploadToBackend: async function (fileName, blob) {
+                    try {
+                        const formData = new FormData();
+                        formData.append('file', blob, fileName);
+                        const response = await fetch(CONFIG.BACKEND_API.UPLOAD_URL, {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const result = await response.json();
+                        console.log("后端返回的响应:", result); // 添加日志
+
+                        // 确保后端返回的响应包含 url 字段
+                        if (!result.url) {
+                            throw new Error("后端未返回有效 URL");
+                        }
+
+                        // 返回成功结果
+                        return {
+                            success: true,
+                            url: result.url,
+                            message: "图片已成功上传到服务器"
+                        };
+                    } catch (error) {
+                        console.error("上传错误:", error);
+                        return {
+                            success: false,
+                            error: error.message,
+                            message: "图片上传失败，请稍后重试"
+                        };
+                    }
+                },
+
+                generateImage: async function () {
+                    const prompt = DOM.promptInput.value.trim();
+                    const resolution = DOM.resolutionSelect.value;
+                    const [width, height] = resolution.split("x");
+
+                    if (!prompt) return this.showAlert("请输入图片描述", "error");
+                    if (!this.isPromptValid(prompt)) return this.showAlert("描述包含不当内容，请修改", "error");
+
+                    this.setLoading(true);
+                    DOM.imageContainer.innerHTML = "";
+                    DOM.actionButtons.style.display = "none";
+                    DOM.infoDisplay.innerHTML = "";
+
+                    try {
+                        const params = new URLSearchParams({
+                            ...CONFIG.IMAGE_API.DEFAULT_PARAMS,
+                            width,
+                            height,
+                            seed: CONFIG.IMAGE_API.DEFAULT_PARAMS.seed()
+                        });
+                        const imageUrl = `${CONFIG.IMAGE_API.ENDPOINT}${encodeURIComponent(prompt)}?${params}`;
+                        const img = await this.loadImage(imageUrl);
+                        DOM.imageContainer.appendChild(img);
+                        DOM.actionButtons.style.display = "flex";
+
+                        const fileName = this.generateFileName(prompt);
+                        const blob = await fetch(imageUrl).then(r => r.blob());
+                        const uploadResult = await this.uploadToBackend(fileName, blob);
+
+                        const fileInfo = {
+                            prompt: prompt,
+                            resolution: resolution,
+                            generatedAt: new Date().toLocaleString(),
+                            fileName: fileName
+                        };
+                        this.displayResults(fileInfo, uploadResult);
+                    } catch (error) {
+                        console.error("生成图片出错:", error);
+                        DOM.imageContainer.innerHTML = `<p class="error">生成失败: ${error.message}</p>`;
+                        this.showAlert("图片生成失败，请重试", "error");
+                    } finally {
+                        this.setLoading(false);
+                    }
+                },
+
+                loadImage: function (url) {
+                    return new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.crossOrigin = "Anonymous";
+                        img.onload = () => resolve(img);
+                        img.onerror = () => reject(new Error("图片加载失败，请检查网络连接"));
+                        img.src = url;
+                        img.alt = "AI生成的图片";
+                    });
+                },
+
+                setLoading: function (isLoading) {
+                    DOM.loadingIndicator.style.display = isLoading ? "block" : "none";
+                    DOM.generateBtn.disabled = isLoading;
+                },
+
+                showAlert: function (message, type = "info") {
+                    const alertBox = document.createElement("div");
+                    alertBox.className = `alert ${type}`;
+                    alertBox.textContent = message;
+                    alertBox.style.position = "fixed";
+                    alertBox.style.top = "20px";
+                    alertBox.style.right = "20px";
+                    alertBox.style.padding = "10px 20px";
+                    alertBox.style.background = type === "error" ? "#f72585" : "#4361ee";
+                    alertBox.style.color = "white";
+                    alertBox.style.borderRadius = "5px";
+                    alertBox.style.zIndex = "1000";
+                    alertBox.style.boxShadow = "0 2px 10px rgba(0,0,0,0.2)";
+                    alertBox.style.animation = "fadeIn 0.3s ease-out";
+                    document.body.appendChild(alertBox);
+                    setTimeout(() => {
+                        alertBox.style.animation = "fadeOut 0.3s ease-out";
+                        setTimeout(() => document.body.removeChild(alertBox), 300);
+                    }, 3000);
+                },
+
+                displayResults: function (fileInfo, uploadResult) {
+                    let html = `
+                        <div class="info-item">
+                            <strong>图片描述:</strong> ${fileInfo.prompt}
+                        </div>
+                        <div class="info-item">
+                            <strong>分辨率:</strong> ${fileInfo.resolution}
+                        </div>
+                        <div class="info-item">
+                            <strong>生成时间:</strong> ${fileInfo.generatedAt}
+                        </div>
+                        <div class="info-item">
+                            <strong>文件名:</strong> ${fileInfo.fileName}
+                        </div>
+                    `;
+                    if (uploadResult.success) {
+                        html += `
+                            <div class="info-item ${uploadResult.success ? 'success' : 'error'}">
+    <strong>上传状态:</strong> ${uploadResult.success ? '成功' : '失败'}
+    <br>
+    <span>${uploadResult.message}</span>
+</div>
+
+                        `;
+                    
+                    }
+                    DOM.infoDisplay.innerHTML = html;
+                },
+
+                saveImage: function () {
+                    const img = DOM.imageContainer.querySelector("img");
+                    if (!img) return this.showAlert("没有可保存的图片", "error");
+                    try {
+                        const canvas = document.createElement("canvas");
+                        const ctx = canvas.getContext("2d");
+                        canvas.width = img.naturalWidth;
+                        canvas.height = img.naturalHeight;
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        canvas.toBlob((blob) => {
+                            const url = URL.createObjectURL(blob);
+                            const link = document.createElement("a");
+                            link.href = url;
+                            link.download = `ai_image_${Date.now()}.jpg`;
+                            link.click();
+                            URL.revokeObjectURL(url);
+                            this.showAlert("图片已保存", "success");
+                        }, 'image/jpeg');
+                    } catch (error) {
+                        console.error("保存图片出错:", error);
+                        this.showAlert("保存图片失败", "error");
+                    }
+                },
+
+                copyImage: async function () {
+                    const img = DOM.imageContainer.querySelector("img");
+                    if (!img) return this.showAlert("没有可复制的图片", "error");
+                    try {
+                        const canvas = document.createElement("canvas");
+                        const ctx = canvas.getContext("2d");
+                        canvas.width = img.naturalWidth;
+                        canvas.height = img.naturalHeight;
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        canvas.toBlob(async (blob) => {
+                            try {
+                                if (navigator.clipboard && navigator.clipboard.write) {
+                                    await navigator.clipboard.write([
+                                        new ClipboardItem({
+                                            [blob.type]: blob
+                                        })
+                                    ]);
+                                    this.showAlert("图片已复制到剪贴板", "success");
+                                } else {
+                                    throw new Error("浏览器不支持复制图片");
+                                }
+                            } catch (error) {
+                                console.error("复制图片出错:", error);
+                                this.showAlert("复制图片失败", "error");
+                            }
+                        }, 'image/png');
+                    } catch (error) {
+                        console.error("复制图片出错:", error);
+                        this.showAlert("复制图片失败", "error");
+                    }
+                }
+            };
+
+            App.init();
+        });
+    </script>
+</body>
+</html>
